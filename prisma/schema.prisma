@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum TipoIndicacao {
+  PENDENTE
+  CONVERTIDO
+  CANCELADO
+}
+
+enum TipoPremio {
+  A_RECEBER
+  PAGO
+}
+
+model Contador {
+  id        Int         @id @default(autoincrement())
+  nome      String
+  email     String
+  senhaHash String      @map("senha_hash")
+  criadoEm  DateTime    @default(now()) @map("criado_em")
+  cliente   Cliente[]
+  indicacao Indicacao[]
+  premio    Premio[]
+
+  @@map("contadores")
+}
+
+model Cliente {
+  id       Int      @id @default(autoincrement())
+  nome     String
+  cnpj     String
+  email    String
+  criadoEm DateTime @default(now()) @map("criado_em")
+
+  contador   Contador @relation(fields: [contadorId], references: [id])
+  contadorId Int      @map("contador_id")
+
+  @@map("clientes")
+}
+
+model Indicacao {
+  id           Int           @id @default(autoincrement())
+  nomeIndicado String        @map("nome_indicado")
+  cnpjIndicado String        @map("cnpj_indicado")
+  status       TipoIndicacao @default(PENDENTE)
+  criadoEm     DateTime      @default(now()) @map("criado_em")
+
+  contador   Contador @relation(fields: [contadorId], references: [id])
+  contadorId Int      @map("contador_id")
+  Premio     Premio[]
+
+  @@map("indicacoes")
+}
+
+model Premio {
+  id       Int        @id @default(autoincrement())
+  valor    Decimal
+  status   TipoPremio @default(A_RECEBER)
+  criadoEm DateTime   @default(now()) @map("criado_em")
+
+  contador   Contador @relation(fields: [contadorId], references: [id])
+  contadorId Int      @map("contador_id")
+
+  indicacao   Indicacao @relation(fields: [indicacaoId], references: [id])
+  indicacaoId Int       @map("indicacao_id")
+
+  @@map("premios")
+}
