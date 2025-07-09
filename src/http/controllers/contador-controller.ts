@@ -14,8 +14,8 @@ export async function contador(request: FastifyRequest, reply: FastifyReply) {
   const { nome, email, senhaHash } = registerBodySchema.parse(request.body)
 
   try {
-		const prismaContadorRepository = new PrismaContadorRepository()
-		const contadorUseCase = new ContadorUseCase(prismaContadorRepository)
+    const prismaContadorRepository = new PrismaContadorRepository()
+    const contadorUseCase = new ContadorUseCase(prismaContadorRepository)
 
     await contadorUseCase.execute({
       nome,
@@ -23,13 +23,13 @@ export async function contador(request: FastifyRequest, reply: FastifyReply) {
       senhaHash,
     })
   } catch (error) {
-		if (error instanceof ContadorAlreadyExistsError){
-			return reply.status(409).send({
-				message: error.message
-			})
-		}
+    if (error instanceof ContadorAlreadyExistsError) {
+      return reply.status(409).send({
+        message: error.message,
+      })
+    }
 
-		return reply.status(500).send()
+    throw error
   }
 
   return reply.status(201).send()
