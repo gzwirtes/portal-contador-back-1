@@ -1,16 +1,21 @@
 import { describe } from 'node:test'
-import { expect, it } from 'vitest'
+import { beforeEach, expect, it } from 'vitest'
 import { ContadorUseCase } from './contador'
 import { compare } from 'bcryptjs'
 import { InMemoryContadorRepository } from '@/repositories/in-memory/in-memory-contador-repository'
 import { ContadorAlreadyExistsError } from './error/contador-already-exists'
 
-describe('Register Use Case', () => {
-  it('schould be able to register', async () => {
-    const contadorRepository = new InMemoryContadorRepository()
-    const contadorUseCase = new ContadorUseCase(contadorRepository)
+let contadorRepository: InMemoryContadorRepository
+let sut: ContadorUseCase
 
-    const { contador } = await contadorUseCase.execute({
+describe('Register Use Case', () => {
+  beforeEach(() => {
+    contadorRepository = new InMemoryContadorRepository()
+    sut = new ContadorUseCase(contadorRepository)
+  })
+
+  it('schould be able to register', async () => {
+    const { contador } = await sut.execute({
       nome: 'Gustavo Zwirtes',
       email: 'gustavo1.zts@gmail.com',
       senhaHash: '123456',
@@ -20,10 +25,7 @@ describe('Register Use Case', () => {
   })
 
   it('schould hash user password upon registration', async () => {
-    const contadorRepository = new InMemoryContadorRepository()
-    const contadorUseCase = new ContadorUseCase(contadorRepository)
-
-    const { contador } = await contadorUseCase.execute({
+    const { contador } = await sut.execute({
       nome: 'Gustavo Zwirtes',
       email: 'gustavo1.zts@gmail.com',
       senhaHash: '123456',
@@ -38,19 +40,16 @@ describe('Register Use Case', () => {
   })
 
   it('schould not be able to register with same email twice', async () => {
-    const contadorRepository = new InMemoryContadorRepository()
-    const contadorUseCase = new ContadorUseCase(contadorRepository)
-
     const email = 'gustavo1.zts@gmail.com'
 
-    await contadorUseCase.execute({
+    await sut.execute({
       nome: 'Gustavo Zwirtes',
       email,
       senhaHash: '123456',
     })
 
     await expect(() =>
-      contadorUseCase.execute({
+      sut.execute({
         nome: 'Gustavo Zwirtes',
         email,
         senhaHash: '123456',

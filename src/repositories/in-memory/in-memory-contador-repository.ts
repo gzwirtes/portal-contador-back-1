@@ -4,6 +4,16 @@ import { ContadorRepository } from '../contador-repository'
 export class InMemoryContadorRepository implements ContadorRepository {
   public items: Contador[] = []
 
+  async findById(id: number): Promise<Contador | null> {
+    const contador = this.items.find((item) => item.id === id)
+
+    if (!contador) {
+      return null
+    }
+
+    return contador
+  }
+
   async findByEmail(email: string) {
     const contador = this.items.find((item) => item.email === email)
 
