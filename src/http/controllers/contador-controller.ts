@@ -2,6 +2,7 @@ import z from 'zod'
 import { FastifyRequest, FastifyReply } from 'fastify'
 import { ContadorAlreadyExistsError } from '@/use-cases/error/contador-already-exists'
 import { makeContadorUseCase } from '@/use-cases/factories/make-contador-use-case'
+import { makeGetContadorProfileUseCase } from '@/use-cases/factories/make-get-contador-profile-use-case'
 
 export async function contador(request: FastifyRequest, reply: FastifyReply) {
   const registerBodySchema = z.object({
@@ -31,4 +32,19 @@ export async function contador(request: FastifyRequest, reply: FastifyReply) {
   }
 
   return reply.status(201).send()
+}
+
+export async function profile(request: FastifyRequest, reply: FastifyReply) {
+  const getContadorProfileUseCase = makeGetContadorProfileUseCase()
+
+  const { contador } = await getContadorProfileUseCase.execute({
+    contadorId: request.user.sub,
+  })
+
+  return reply.status(201).send({
+    contador: {
+      ...contador,
+      senhaHash: undefined,
+    },
+  })
 }

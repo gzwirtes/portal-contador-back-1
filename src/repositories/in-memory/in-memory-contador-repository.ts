@@ -1,5 +1,6 @@
 import { Contador, Prisma } from 'generated/prisma'
 import { ContadorRepository } from '../contador-repository'
+import { randomUUID } from 'node:crypto'
 
 export class InMemoryContadorRepository implements ContadorRepository {
   public items: Contador[] = []
@@ -26,7 +27,7 @@ export class InMemoryContadorRepository implements ContadorRepository {
 
   async create(data: Prisma.ContadorCreateInput) {
     const contador = {
-      id: 1,
+      id: randomUUID(),
       nome: data.nome,
       email: data.email,
       senhaHash: data.senhaHash,

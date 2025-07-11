@@ -1,4 +1,4 @@
-import { Indicacao, TipoIndicacao } from 'generated/prisma'
+import { Indicacao } from 'generated/prisma'
 import { IndicacaoRepository } from '@/repositories/indicacao-repository'
 
 interface IndicacaoUseCaseRequest {
@@ -7,9 +7,8 @@ interface IndicacaoUseCaseRequest {
   contadorId: number
   status: string
 }
-
-interface IndicacaoUseCaseResponse {
-  indicacao: Indicacao
+interface IndicacaoUsecaseResponse {
+  indicacao: Indicacao[]
 }
 
 export class IndicacaoUseCase {
@@ -19,8 +18,14 @@ export class IndicacaoUseCase {
     nomeIndicado,
     cnpjIndicado,
     contadorId,
-    status,
-  }: IndicacaoUseCaseRequest): Promise<IndicacaoUseCaseResponse> {
+  }: IndicacaoUseCaseRequest): Promise<IndicacaoUsecaseResponse> {
+    const indicacaoExists =
+      await this.indicacaoRepository.findByCnpj(cnpjIndicado)
+
+    if (indicacaoExists) {
+      throw new Error('CNPJ já indicado')
+    }
+
     const indicacao = await this.indicacaoRepository.create({
       nomeIndicado,
       cnpjIndicado,
@@ -29,11 +34,8 @@ export class IndicacaoUseCase {
           id: contadorId,
         },
       },
-      status: TipoIndicacao.PENDENTE,
     })
 
-    return {
-      indicacao,
-    }
+    return { indicacao }
   }
 }

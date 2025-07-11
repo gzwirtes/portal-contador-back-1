@@ -6,7 +6,7 @@ export class PrismaContadorRepository implements ContadorRepository {
   async findById(id: number): Promise<Contador | null> {
     const contador = await prisma.contador.findUnique({
       where: {
-        id,
+        id: Number(id),
       },
     })
 
